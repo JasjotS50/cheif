@@ -2,7 +2,10 @@
 <html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#ff6b35" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>{{ agent_name }} — AI Recipe Preparation Agent</title>
 
   <!-- Bootstrap 5 -->
@@ -33,10 +36,11 @@
     </a>
 
     <!-- Mobile toggle -->
-    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse"
-            data-bs-target="#navContent" aria-label="Toggle navigation">
-      <i class="bi bi-list fs-4"></i>
-    </button>
+    <button class="navbar-toggler border-0 mobile-menu-btn" type="button" data-bs-toggle="collapse"
+        data-bs-target="#navContent" aria-label="Toggle navigation"
+        aria-expanded="false" aria-controls="navContent">
+  <i class="bi bi-list fs-4" id="menuIcon"></i>
+</button>
 
     <!-- Nav items -->
     <div class="collapse navbar-collapse" id="navContent">
