@@ -97,6 +97,7 @@ body {
   transition: background var(--transition-slow), color var(--transition-slow);
   min-height: 100vh;
   overflow-x: hidden;
+   overscroll-behavior: none;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -104,13 +105,14 @@ body {
 ───────────────────────────────────────────────────────────────────────────── */
 #mainNav {
   height: var(--nav-height);
+   min-height: var(--nav-height); 
   background: var(--bg-nav);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
   transition: background var(--transition-slow);
-  z-index: 1000;
+  z-index: 1050;
 }
 
 .brand-icon {
@@ -171,6 +173,70 @@ body {
   color: var(--accent);
   border-color: var(--accent);
   transform: rotate(20deg);
+}
+
+.mobile-menu-btn {
+  width: 40px; height: 40px;
+  border-radius: 8px !important;
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-color) !important;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-primary);
+  font-size: 20px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0 !important;
+}
+.mobile-menu-btn:hover,
+.mobile-menu-btn[aria-expanded="true"] {
+  background: var(--accent-light) !important;
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+}
+
+@media (max-width: 991px) {
+  #navContent {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.10);
+    padding: 12px;
+    margin-top: 8px;
+    position: absolute;
+    top: calc(var(--nav-height) - 4px);
+    left: 12px;
+    right: 12px;
+    z-index: 1049;
+  }
+  #navContent .navbar-nav {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 4px !important;
+  }
+  #navContent .nav-item { width: 100%; }
+  #navContent .nav-btn {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+  #navContent .nav-btn:hover,
+  #navContent .nav-btn.active {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-color: rgba(255,107,53,0.2);
+  }
+  #navContent .nav-btn span { display: inline !important; }
+  #navContent .nav-item.ms-2 {
+    margin-left: 0 !important;
+    margin-top: 4px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 8px;
+  }
+  #navContent .theme-toggle {
+    width: 100%; border-radius: 8px;
+    justify-content: center; height: 38px;
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -1163,6 +1229,28 @@ body {
   .panel-card { padding: 16px; }
 
   .modal-dialog { margin: 8px; }
+
+   /* ADD these inside the existing @media (max-width: 768px) { } block */
+
+.chat-layout {
+  height: calc(100dvh - var(--nav-height));
+  min-height: 0;
+}
+.chat-send-btn { width: 48px; height: 48px; font-size: 19px; }
+.welcome-starters { padding: 0 4px; }
+.starter-btn { font-size: 12.5px; padding: 10px 12px; }
+.search-big-input { font-size: 16px; padding: 13px 44px; }  /* was 14px */
+.modal-dialog { margin: 0; max-width: 100%; min-height: 100%; }
+.modal-content, .recipe-modal-content { border-radius: 0; min-height: 100vh; }
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='%23ff6b35' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E") !important;
+}
+.modal-body { overflow-x: hidden; }
+.modal-body .row { flex-direction: column; }
+.modal-body .col-md-4, .modal-body .col-md-8 { width: 100%; }
+.chat-input-area { padding: 8px 12px; }
+.ingredient-quick-row { gap: 4px; }
+.quick-ingredient-tags { max-width: calc(100vw - 140px); overflow-x: auto; flex-wrap: nowrap; }
 }
 
 @media (max-width: 480px) {
