@@ -173,11 +173,7 @@ body {
   color: var(--accent);
   border-color: var(--accent);
 }
-@media (hover: hover) and (pointer: fine) {
-  .theme-toggle:hover {
-    transform: rotate(20deg);
-  }
-}
+
 
 .mobile-menu-btn {
   width: 40px; height: 40px;
