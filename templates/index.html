@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ agent_name }} — AI Recipe Preparation Agent</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <!-- Marked.js for Markdown rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- Custom CSS -->
+  <link href="/static/css/style.css" rel="stylesheet" />
+</head>
+<body>
+
+<!-- =====================================================================
+     TOP NAVIGATION BAR
+====================================================================== -->
+<nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
+  <div class="container-fluid px-4">
+
+    <!-- Brand -->
+    <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+      <div class="brand-icon">
+        <i class="bi bi-fire"></i>
+      </div>
+      <span class="brand-name">{{ agent_name }}</span>
+    </a>
+
+    <!-- Mobile toggle -->
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navContent" aria-label="Toggle navigation">
+      <i class="bi bi-list fs-4"></i>
+    </button>
+
+    <!-- Nav items -->
+    <div class="collapse navbar-collapse" id="navContent">
+      <ul class="navbar-nav ms-auto align-items-center gap-1">
+        <li class="nav-item">
+          <button class="nav-btn active" id="navChat" onclick="switchTab('chat')">
+            <i class="bi bi-chat-dots-fill"></i> <span>Chat</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-btn" id="navDashboard" onclick="switchTab('dashboard')">
+            <i class="bi bi-grid-fill"></i> <span>Recipes</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-btn" id="navIngredients" onclick="switchTab('ingredients')">
+            <i class="bi bi-basket3-fill"></i> <span>Pantry</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-btn" id="navSearch" onclick="switchTab('search')">
+            <i class="bi bi-search"></i> <span>Search</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-btn" id="navPrefs" onclick="switchTab('prefs')">
+            <i class="bi bi-sliders"></i> <span>Prefs</span>
+          </button>
+        </li>
+        <!-- Dark mode toggle -->
+        <li class="nav-item ms-2">
+          <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark mode">
+            <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+          </button>
+        </li>
+      </ul>
+    </div>
+
+  </div>
+</nav>
+
+<!-- =====================================================================
+     MAIN CONTENT AREA
+====================================================================== -->
+<main class="main-content" id="mainContent">
+
+  <!-- ----------------------------------------------------------------
+       TAB: CHAT
+  ----------------------------------------------------------------- -->
+  <section class="tab-panel active" id="tabChat">
+    <div class="chat-layout">
+
+      <!-- Left sidebar: Quick Actions + Pantry Summary -->
+      <aside class="chat-sidebar">
+        <div class="sidebar-card">
+          <h6 class="sidebar-title"><i class="bi bi-lightning-fill text-warning"></i> Quick Actions</h6>
+          <div class="quick-actions-grid">
+            <button class="quick-btn" onclick="quickAction('suggest_with_ingredients')">
+              <i class="bi bi-magic"></i>
+              <span>Suggest Recipes</span>
+            </button>
+            <button class="quick-btn" onclick="quickAction('random_recipe')">
+              <i class="bi bi-shuffle"></i>
+              <span>Surprise Me</span>
+            </button>
+            <button class="quick-btn" onclick="quickAction('cooking_tip')">
+              <i class="bi bi-lightbulb"></i>
+              <span>Pro Tip</span>
+            </button>
+            <button class="quick-btn" onclick="quickAction('substitutions')">
+              <i class="bi bi-arrow-left-right"></i>
+              <span>Substitutions</span>
+            </button>
+            <button class="quick-btn" onclick="quickAction('meal_plan')">
+              <i class="bi bi-calendar3"></i>
+              <span>Meal Plan</span>
+            </button>
+            <button class="quick-btn" onclick="clearChat()">
+              <i class="bi bi-trash3"></i>
+              <span>Clear Chat</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="sidebar-card mt-3">
+          <h6 class="sidebar-title"><i class="bi bi-basket-fill text-success"></i> My Pantry
+            <span class="badge-count" id="pantryCount">0</span>
+          </h6>
+          <div id="sidebarIngredients" class="sidebar-ingredients">
+            <p class="empty-text">No ingredients added yet. <a href="#" onclick="switchTab('ingredients'); return false;">Add some →</a></p>
+          </div>
+        </div>
+
+        <div class="sidebar-card mt-3">
+          <h6 class="sidebar-title"><i class="bi bi-bookmark-star text-primary"></i> Retrieved Recipes</h6>
+          <div id="retrievedRecipes" class="retrieved-list">
+            <p class="empty-text">Recipes will appear here after you chat.</p>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main chat area -->
+      <div class="chat-main">
+        <!-- Chat messages -->
+        <div class="chat-messages" id="chatMessages">
+          <!-- Welcome card -->
+          <div class="welcome-card" id="welcomeCard">
+            <div class="welcome-icon">🍳</div>
+            <h3>Hello! I'm {{ agent_name }}</h3>
+            <p>Your AI-powered culinary companion. I can help you:</p>
+            <div class="welcome-features">
+              <div class="welcome-feature"><i class="bi bi-check-circle-fill text-success"></i> Find recipes with your ingredients</div>
+              <div class="welcome-feature"><i class="bi bi-check-circle-fill text-success"></i> Generate step-by-step instructions</div>
+              <div class="welcome-feature"><i class="bi bi-check-circle-fill text-success"></i> Suggest ingredient substitutions</div>
+              <div class="welcome-feature"><i class="bi bi-check-circle-fill text-success"></i> Provide professional cooking tips</div>
+              <div class="welcome-feature"><i class="bi bi-check-circle-fill text-success"></i> Adapt recipes to your dietary needs</div>
+            </div>
+            <div class="welcome-starters">
+              <p class="text-muted small mb-2">Try asking:</p>
+              <button class="starter-btn" onclick="sendStarter('What can I make with chicken, garlic, and lemon?')">🍋 What can I make with chicken, garlic, and lemon?</button>
+              <button class="starter-btn" onclick="sendStarter('Give me a quick 30-minute dinner idea')">⏱️ Give me a quick 30-minute dinner idea</button>
+              <button class="starter-btn" onclick="sendStarter('I\'m vegan. What\'s a good high-protein dinner?')">🥦 I'm vegan. What's a good high-protein dinner?</button>
+              <button class="starter-btn" onclick="sendStarter('How do I substitute eggs in baking?')">🥚 How do I substitute eggs in baking?</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Typing indicator -->
+        <div class="typing-indicator d-none" id="typingIndicator">
+          <div class="typing-avatar"><i class="bi bi-fire"></i></div>
+          <div class="typing-bubbles">
+            <span></span><span></span><span></span>
+          </div>
+          <span class="typing-text">{{ agent_name }} is cooking up a response...</span>
+        </div>
+
+        <!-- Chat input -->
+        <div class="chat-input-area">
+          <!-- Ingredient quick-add row -->
+          <div class="ingredient-quick-row" id="ingredientQuickRow">
+            <div class="quick-ingredient-tags" id="quickIngredientTags">
+              <!-- Tags added dynamically -->
+            </div>
+            <button class="btn-add-ingredient" id="toggleIngredientBar" onclick="toggleIngredientBar()">
+              <i class="bi bi-plus-circle"></i> Add Ingredient
+            </button>
+          </div>
+
+          <!-- Inline ingredient input (hidden by default) -->
+          <div class="inline-ingredient-add d-none" id="inlineIngredientAdd">
+            <input type="text" id="inlineIngredientInput" placeholder="Type ingredient and press Enter..."
+                   onkeydown="if(event.key==='Enter') addInlineIngredient()" />
+            <button onclick="addInlineIngredient()"><i class="bi bi-check-lg"></i></button>
+            <button onclick="toggleIngredientBar()"><i class="bi bi-x-lg"></i></button>
+          </div>
+
+          <div class="chat-input-row">
+            <div class="chat-input-wrapper">
+              <textarea id="chatInput" class="chat-textarea" rows="1"
+                        placeholder="Ask me about recipes, cooking techniques, substitutions…"
+                        onkeydown="handleInputKeydown(event)"
+                        oninput="autoResize(this)"></textarea>
+            </div>
+            <button class="chat-send-btn" id="sendBtn" onclick="sendMessage()">
+              <i class="bi bi-send-fill"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ----------------------------------------------------------------
+       TAB: RECIPE DASHBOARD
+  ----------------------------------------------------------------- -->
+  <section class="tab-panel" id="tabDashboard">
+    <div class="container-fluid px-4 py-4">
+      <div class="page-header">
+        <h2 class="page-title"><i class="bi bi-grid-fill"></i> Recipe Dashboard</h2>
+        <p class="page-subtitle">Explore our curated collection of recipes</p>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="filter-bar">
+        <div class="filter-group">
+          <select class="filter-select" id="filterCuisine" onchange="loadDashboard()">
+            <option value="">All Cuisines</option>
+            <option value="italian">Italian</option>
+            <option value="indian">Indian</option>
+            <option value="mexican">Mexican</option>
+            <option value="asian">Asian</option>
+            <option value="american">American</option>
+            <option value="mediterranean">Mediterranean</option>
+            <option value="middle eastern">Middle Eastern</option>
+          </select>
+          <select class="filter-select" id="filterDiet" onchange="loadDashboard()">
+            <option value="">All Diets</option>
+            <option value="vegan">Vegan</option>
+            <option value="vegetarian">Vegetarian</option>
+            <option value="gluten-free">Gluten-Free</option>
+            <option value="dairy-free">Dairy-Free</option>
+            <option value="keto">Keto</option>
+          </select>
+          <select class="filter-select" id="filterDifficulty" onchange="loadDashboard()">
+            <option value="">All Levels</option>
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+        <div class="recipe-count-badge" id="dashboardCount">Loading...</div>
+      </div>
+
+      <!-- Recipe grid -->
+      <div class="recipe-grid" id="recipeGrid">
+        <div class="loading-skeleton">
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ----------------------------------------------------------------
+       TAB: INGREDIENT MANAGER
+  ----------------------------------------------------------------- -->
+  <section class="tab-panel" id="tabIngredients">
+    <div class="container-fluid px-4 py-4">
+      <div class="page-header">
+        <h2 class="page-title"><i class="bi bi-basket3-fill"></i> Pantry Manager</h2>
+        <p class="page-subtitle">Tell me what you have — I'll find recipes that work</p>
+      </div>
+
+      <div class="row g-4">
+        <!-- Add ingredients -->
+        <div class="col-lg-5">
+          <div class="panel-card">
+            <h5 class="panel-card-title">Add Ingredients</h5>
+
+            <div class="ingredient-input-group">
+              <input type="text" id="ingredientInput" class="ingredient-text-input"
+                     placeholder="e.g. chicken breast, garlic, lemon..."
+                     onkeydown="if(event.key==='Enter') addIngredient()" />
+              <button class="btn-primary-action" onclick="addIngredient()">
+                <i class="bi bi-plus-lg"></i> Add
+              </button>
+            </div>
+
+            <!-- Suggested common ingredients -->
+            <div class="common-ingredients mt-4">
+              <p class="text-muted small mb-2">Common pantry staples:</p>
+              <div class="common-tags" id="commonTags">
+                <!-- Generated by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Current pantry -->
+        <div class="col-lg-7">
+          <div class="panel-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="panel-card-title mb-0">My Pantry (<span id="pantryCountBig">0</span> items)</h5>
+              <button class="btn-ghost-danger" onclick="clearIngredients()">
+                <i class="bi bi-trash3"></i> Clear All
+              </button>
+            </div>
+
+            <div id="ingredientsList" class="ingredients-grid">
+              <div class="empty-pantry">
+                <i class="bi bi-basket display-4 d-block mb-3 text-muted"></i>
+                <p class="text-muted">Your pantry is empty.<br>Add ingredients to get personalized recipe suggestions!</p>
+              </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-top" id="pantryActions" style="display:none!important">
+              <button class="btn-primary-action w-100" onclick="switchTab('chat'); quickAction('suggest_with_ingredients')">
+                <i class="bi bi-magic"></i> Find Recipes With These Ingredients
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ----------------------------------------------------------------
+       TAB: RECIPE SEARCH
+  ----------------------------------------------------------------- -->
+  <section class="tab-panel" id="tabSearch">
+    <div class="container-fluid px-4 py-4">
+      <div class="page-header">
+        <h2 class="page-title"><i class="bi bi-search"></i> Recipe Search</h2>
+        <p class="page-subtitle">Search by name, ingredient, cuisine, or dietary need</p>
+      </div>
+
+      <div class="search-hero">
+        <div class="search-box-wrapper">
+          <i class="bi bi-search search-icon"></i>
+          <input type="text" id="searchInput" class="search-big-input"
+                 placeholder="Try 'pasta', 'vegan dessert', 'quick chicken'..."
+                 oninput="debounceSearch()" onkeydown="if(event.key==='Enter') doSearch()" />
+          <button class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()" style="display:none">
+            <i class="bi bi-x-circle-fill"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search results -->
+      <div id="searchResults" class="recipe-grid mt-4">
+        <p class="search-hint text-center text-muted py-5">
+          <i class="bi bi-search display-4 d-block mb-3"></i>
+          Start typing to search recipes...
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ----------------------------------------------------------------
+       TAB: PREFERENCES
+  ----------------------------------------------------------------- -->
+  <section class="tab-panel" id="tabPrefs">
+    <div class="container-fluid px-4 py-4">
+      <div class="page-header">
+        <h2 class="page-title"><i class="bi bi-sliders"></i> Dietary Preferences</h2>
+        <p class="page-subtitle">Help Chef Prag personalize recommendations for you</p>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-lg-6">
+          <div class="panel-card">
+            <h5 class="panel-card-title">Diet Preferences</h5>
+            <p class="text-muted small">Select all that apply — the AI will tailor every response accordingly.</p>
+            <div class="pref-tags" id="dietTags">
+              <!-- Generated by JS -->
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="panel-card">
+            <h5 class="panel-card-title">Allergies & Restrictions</h5>
+            <p class="text-muted small">These are treated as hard constraints — the AI will never suggest dishes with these allergens.</p>
+            <div class="pref-tags" id="allergyTags">
+              <!-- Generated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <button class="btn-primary-action px-5" onclick="savePreferences()">
+            <i class="bi bi-check2-circle"></i> Save Preferences
+          </button>
+          <span class="pref-save-status ms-3" id="prefSaveStatus"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- =====================================================================
+     RECIPE DETAIL MODAL
+====================================================================== -->
+<div class="modal fade" id="recipeModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content recipe-modal-content">
+      <div class="modal-header recipe-modal-header">
+        <div>
+          <h4 class="modal-title" id="modalRecipeName">Recipe Name</h4>
+          <div class="modal-meta" id="modalMeta"></div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="row g-4">
+          <div class="col-md-4">
+            <div class="modal-info-section">
+              <h6 class="section-label">Description</h6>
+              <p id="modalDescription"></p>
+            </div>
+            <div class="modal-info-section mt-3">
+              <h6 class="section-label">Quick Stats</h6>
+              <div id="modalStats" class="stats-grid"></div>
+            </div>
+            <div class="modal-info-section mt-3">
+              <h6 class="section-label">Ingredients</h6>
+              <ul id="modalIngredients" class="ingredient-list"></ul>
+            </div>
+            <div class="modal-info-section mt-3" id="modalAllergenSection">
+              <h6 class="section-label text-danger">⚠ Allergens</h6>
+              <div id="modalAllergens"></div>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <div class="modal-info-section">
+              <h6 class="section-label">Instructions</h6>
+              <ol id="modalInstructions" class="instruction-list"></ol>
+            </div>
+            <div class="modal-info-section mt-3">
+              <h6 class="section-label">Chef's Tips</h6>
+              <ul id="modalTips" class="tips-list"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer recipe-modal-footer">
+        <button class="btn-ghost" data-bs-dismiss="modal">Close</button>
+        <button class="btn-primary-action" id="modalCookNow" onclick="cookNowFromModal()">
+          <i class="bi bi-fire"></i> Ask Chef Prag to Guide Me
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast notifications -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="liveToast" class="toast align-items-center border-0" role="alert">
+    <div class="d-flex">
+      <div class="toast-body" id="toastBody">Message</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Custom JS -->
+<script src="/static/js/app.js"></script>
+</body>
+</html>
