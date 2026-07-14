@@ -172,7 +172,11 @@ body {
   background: var(--accent-light);
   color: var(--accent);
   border-color: var(--accent);
-  transform: rotate(20deg);
+}
+@media (hover: hover) and (pointer: fine) {
+  .theme-toggle:hover {
+    transform: rotate(20deg);
+  }
 }
 
 .mobile-menu-btn {
